@@ -4,8 +4,6 @@
   "description": "",
   "main": "construct-html.js",
   "dependencies": {
-    "fast-xml-parser": "^3.19.0",
-    "he": "^1.2.0",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {},

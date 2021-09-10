@@ -1,6 +1,5 @@
 const fs = require('fs')
 const convert = require('xml-js')
-const util = require('util')
 
 let html = ''
 const data = fs.readFileSync('contents.xml')
