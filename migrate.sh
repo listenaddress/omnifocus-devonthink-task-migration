@@ -1,4 +1,6 @@
+rm -r Files
+rm -r Tasks
 rm contents.xml
 ls
 unzip OmniFocus.ofocus/*.zip
-cat contents.xml
+node --trace-uncaught construct-html.js

@@ -1,5 +1,7 @@
 /OmniFocus*
 contents.xml
-*.html
+/Tasks
+/Files
 /node_modules
 /TODO
+.DS_Store

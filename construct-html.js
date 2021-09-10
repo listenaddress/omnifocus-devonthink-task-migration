@@ -1,5 +1,14 @@
 const fs = require('fs')
 const convert = require('xml-js')
+const path = require('path')
+
+fs.mkdir(path.join(__dirname, 'Tasks'), err => {
+  if (err) throw err
+})
+
+fs.mkdir(path.join(__dirname, 'Files'), err => {
+  if (err) throw err
+})
 
 const data = fs.readFileSync('contents.xml')
 const jsonString = convert.xml2json(data)
@@ -34,7 +43,7 @@ const constructHTML = () => {
     html = ammendHeader(html)
     html = ammendTopLevelTask(name, html)
     html = closeTask(html)
-    fs.writeFile(`${name}.html`, html, (err) => {
+    fs.writeFile(`Tasks/${name}.html`, html, (err) => {
       if (err) throw err;
       console.log('Yerrrrr!');
     })
