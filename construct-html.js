@@ -20,7 +20,7 @@ const ammendTaskFiles = (html, task) => {
   const noteObj = task.elements.find(e => {
     return e.name === 'note' && e.elements && e.elements.length > 0
   })
-  if (!noteObj) return
+  if (!noteObj) return html
   const textObj = noteObj.elements.find(e => {
     return e.name === 'text' && e.elements && e.elements.length > 0
   })
@@ -57,12 +57,14 @@ const ammendTaskFiles = (html, task) => {
     if (file) files.push(file)
   })
 
-  if (files) {
+  if (files.length > 0) {
     files.forEach(f => {
-      html += `<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;">📄&nbsp;<a href="./files/${f.attributes.name}">${f.attributes.name}</a></p>`
+      console.log('f', f)
+      html += `<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;">📄&nbsp;<a href="/Files/${f.attributes.name}">${f.attributes.name}</a></p>`
     })
   }
 
+  console.log('returning html', html)
   return html
 }
 
@@ -79,12 +81,17 @@ const ammendTask = (html, task) => {
   // add task
   html += `<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;"><input type="checkbox" id="0753B386-29EC-49BB-90A2-2BE45BE5CF16" ${checked ? 'checked="checked"' : ''}"><span class="Apple-tab-span" style="white-space: pre;"></span><b>${name}</b></p>`
 
-  // html = ammendTaskFiles(html, task)
+  console.log('going into ammendTaskFiles now', name)
+  console.log('vvvvvvvv')
+  console.log('vvvvvvvv')
+  console.log('vvvvvvvv')
+  console.log(html)
+  let newHTML = ammendTaskFiles(html, task)
 
   // close task
-  html += '<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;"><br></p>'
+  newHTML += '<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;"><br></p>'
 
-  return html
+  return newHTML
 }
 
 const ammendHeader = (html) => {
@@ -104,7 +111,7 @@ const ammendProject = (html, project, name) => {
   })
 
   topLevelTasks.forEach(t => {
-    ammendTask(html, t)
+    html = ammendTask(html, t)
   })
 
   return html
