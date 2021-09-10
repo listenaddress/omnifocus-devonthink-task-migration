@@ -1,10 +1,10 @@
 rm contents.xml
 rm -r Files
-rm -r Tasks
+rm -r Projects
 rm -r OmniFocusContent
 
 mkdir Files
-mkdir Tasks
+mkdir Projects
 mkdir OmniFocusContent
 unzip OmniFocus.ofocus/*.zip -d OmniFocusContent
 
