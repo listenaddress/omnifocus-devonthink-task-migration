@@ -19,10 +19,7 @@ const ammendHeader = (html) => {
 }
 
 const ammendSubTasks = (html, task) => {
-  // console.log('task', util.inspect(task, { depth: null }))
-  console.log('task.attributes.id', task.attributes.id)
   const subTasks = tasks.filter(t => {
-    console.log('t.attributes.idref', t.attributes.idref)
     const item = t.elements.find(e => e.name === 'task' && e.attributes && e.attributes.idref === task.attributes.id)
     if (item) {
       return true
@@ -81,7 +78,6 @@ const ammendTaskFilesAndNotes = (html, task, subtask) => {
 
   // Add files
   litObjs.forEach(o => {
-    // console.log(util.inspect(litObjs, { depth: null }));
     const file = o.elements.find(e => {
       return e.name === 'cell'
     })
@@ -116,12 +112,12 @@ const ammendTask = (html, task) => {
     return e.name === 'completed' && e.elements && e.elements.length === 1
   })
 
-  // add task
+  // Add task
   html += `<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;"><input type="checkbox" id="0753B386-29EC-49BB-90A2-2BE45BE5CF16" ${checked ? 'checked="checked"' : ''}"><span class="Apple-tab-span" style="white-space: pre;"></span><b>${name}</b></p>`
   html = ammendTaskFilesAndNotes(html, task)
   html = ammendSubTasks(html, task)
 
-  // close task
+  // Close task
   html += '<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;"><br></p>'
 
   return html
@@ -150,6 +146,7 @@ const ammendProject = (html, project, name) => {
 }
 
 const constructHTML = () => {
+  console.log('\n')
   projects.forEach(project => {
     let html = ''
     const name = project.elements.find(e => e.name === 'name' && e.elements.length === 1).elements[0].text
@@ -158,7 +155,7 @@ const constructHTML = () => {
     html = closeTask(html)
     fs.writeFile(`Projects/${name}.html`, html, (err) => {
       if (err) throw err;
-      console.log('Made ', `Projects/${name}.html`);
+      console.log('Made:', `Projects/${name}.html`);
     })
   });
 }
