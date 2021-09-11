@@ -9,6 +9,6 @@ mkdir Files
 mkdir Projects
 mkdir OmniFocusContent
 unzip OmniFocus.ofocus/*.zip -d OmniFocusContent
-cp OmniFocusContent/data/*/* Files
+cp -r OmniFocusContent/data/*/* Files
 
 node --trace-uncaught construct-html.js
