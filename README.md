@@ -12,3 +12,4 @@ https://www.youtube.com/watch?v=y3cWLih-OOU
 
 ## Notes
 - This only works with embedded OmniFocus files right now.
+- Depending on your context, OmniFocus may give you a document with a different structure. alternate-migration.sh and migration.sh support two different structures. 
