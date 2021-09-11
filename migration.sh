@@ -1,3 +1,5 @@
+npm install
+
 rm contents.xml
 rm -r Files
 rm -r Projects
