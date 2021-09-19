@@ -2,6 +2,7 @@ const fs = require('fs')
 const convert = require('xml-js')
 const path = require('path')
 const util = require('util')
+const { create } = require('domain')
 
 const data = fs.readFileSync('OmniFocusContent/contents.xml')
 const jsonString = convert.xml2json(data)
@@ -13,6 +14,61 @@ const projects = tasks.filter(t => {
     return true
   }
 })
+
+// Create folder structure
+const folderElements = json.elements[0].elements.filter(e => e.name === 'folder')
+const folders = {}
+const createFolderStructure = () => {
+  folderElements.forEach(f => {
+    const constructFolderPath = (folder, path, level = 0) => {
+      level += 1
+      const textObj = folder.elements.find(e => e.name === 'name' && e.elements)
+      const name = textObj.elements.find(e => e.type === 'text')
+      path = `/${name.text}` + path
+
+      const nextFolderObj = folder.elements.find(e => e.name === 'folder' && e.attributes)
+      if (!nextFolderObj) {
+        folders[f.attributes.id] = { path, level }
+        return
+      }
+      const nextFolder = folderElements.find(n => n.attributes.id === nextFolderObj.attributes.idref)
+      return constructFolderPath(nextFolder, path, level)
+    }
+
+    constructFolderPath(f, '')
+  })
+
+  const makeFolders = (level = 0) => {
+    level += 1
+    const asArray = Object.entries(folders);
+    const filtered = asArray.filter(([_, value]) => value.level === level);
+    const levelFolders = Object.fromEntries(filtered);
+
+    if (Object.keys(levelFolders).length === 0) return
+    Object.keys(levelFolders).forEach(key => {
+      fs.mkdir(path.join(__dirname, 'Projects' + levelFolders[key].path), (err) => {
+        if (err) {
+          if (err.code === 'EEXIST') {
+            console.log(`Trying to make ${levelFolders[key].path} again`)
+          } else {
+            throw err
+          }
+        }
+
+        console.log(`${levelFolders[key].path} directory created`);
+      })
+    });
+
+    setTimeout(() => {
+      makeFolders(level)
+    }, 500)
+  }
+
+  makeFolders()
+}
+
+console.log('\n')
+createFolderStructure()
 
 const ammendHeader = (html) => {
   return html += '<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="DT:isEditableNote" content="Yes"><style></style></head>'
@@ -149,15 +205,21 @@ const constructHTML = () => {
   console.log('\n')
   projects.forEach(project => {
     let html = ''
+    let path = ''
+    const projectObj = project.elements.find(e => e.name === 'project')
+    const folderObj = projectObj.elements.find(e => e.name === 'folder' && e.attributes)
+    if (folderObj) {
+      path += folders[folderObj.attributes.idref].path
+    }
     const name = project.elements.find(e => e.name === 'name' && e.elements.length === 1).elements[0].text
     html = ammendHeader(html)
     html = ammendProject(html, project, name)
     html = closeTask(html)
-    fs.writeFile(`Projects/${name}.html`, html, (err) => {
+    fs.writeFile(`Projects${path}/${name}.html`, html, (err) => {
       if (err) throw err;
-      console.log('Made:', `Projects/${name}.html`);
+      console.log('Made:', `Projects${path}/${name}.html`);
     })
   });
 }
 
-constructHTML()
+setTimeout(() => constructHTML(), 5000)
