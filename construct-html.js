@@ -14,6 +14,8 @@ const projects = tasks.filter(t => {
     return true
   }
 })
+
+// Create folder structure
 const folderElements = json.elements[0].elements.filter(e => e.name === 'folder')
 const folders = {}
 const createFolderStructure = () => {
@@ -65,6 +67,7 @@ const createFolderStructure = () => {
   makeFolders()
 }
 
+console.log('\n')
 createFolderStructure()
 
 const ammendHeader = (html) => {
