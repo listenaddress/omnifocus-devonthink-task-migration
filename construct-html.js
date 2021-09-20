@@ -1,17 +1,22 @@
 const fs = require('fs')
 const convert = require('xml-js')
 const path = require('path')
-const util = require('util')
-const { create } = require('domain')
+// const util = require('util')
 
 const data = fs.readFileSync('OmniFocusContent/contents.xml')
 const jsonString = convert.xml2json(data)
 const json = JSON.parse(jsonString)
 const tasks = json.elements[0].elements.filter(t => t.name === 'task')
+
 const projects = tasks.filter(t => {
-  const item = t.elements.find(e => e.name === 'task' && !e.attributes)
-  if (item) {
+  const item = t.elements.find(e => e.name === 'task')
+  if (item) return
+
+  const project = t.elements.find(e => e.name === 'project')
+  if (project && project.elements) {
     return true
+  } else {
+    debugger
   }
 })
 
@@ -23,14 +28,19 @@ const createFolderStructure = () => {
     const constructFolderPath = (folder, path, level = 0) => {
       level += 1
       const textObj = folder.elements.find(e => e.name === 'name' && e.elements)
-      const name = textObj.elements.find(e => e.type === 'text')
-      path = `/${name.text}` + path
+      let name = textObj.elements.find(e => e.type === 'text').text
+      if (name.indexOf('/') > -1) {
+        name = name.replace(/\//g, '-')
+      }
+
+      path = `/${name}` + path
 
       const nextFolderObj = folder.elements.find(e => e.name === 'folder' && e.attributes)
       if (!nextFolderObj) {
         folders[f.attributes.id] = { path, level }
         return
       }
+
       const nextFolder = folderElements.find(n => n.attributes.id === nextFolderObj.attributes.idref)
       return constructFolderPath(nextFolder, path, level)
     }
@@ -49,13 +59,10 @@ const createFolderStructure = () => {
       fs.mkdir(path.join(__dirname, 'Projects' + levelFolders[key].path), (err) => {
         if (err) {
           if (err.code === 'EEXIST') {
-            console.log(`Trying to make ${levelFolders[key].path} again`)
           } else {
             throw err
           }
         }
-
-        console.log(`${levelFolders[key].path} directory created`);
       })
     });
 
@@ -92,7 +99,7 @@ const ammendSubTasks = (html, task) => {
       return e.name === 'completed' && e.elements && e.elements.length === 1
     })
 
-    // add task
+    // Add task
     html += `<p style="font-family: Georgia; font-size: 14px; margin: 0px; font-stretch: normal; line-height: normal; color: rgb(20, 20, 20); min-height: 16px;">&emsp;<input type="checkbox" id="0753B386-29EC-49BB-90A2-2BE45BE5CF16" ${checked ? 'checked="checked"' : ''}"><span class="Apple-tab-span" style="white-space: pre;"></span><b>${name}</b></p>`
     html = ammendTaskFilesAndNotes(html, s, true)
   })
@@ -134,10 +141,13 @@ const ammendTaskFilesAndNotes = (html, task, subtask) => {
 
   // Add files
   litObjs.forEach(o => {
+    if (!o.elements) return
     const file = o.elements.find(e => {
       return e.name === 'cell'
     })
-    if (file) files.push(file)
+
+    if (!file) return
+    files.push(file)
   })
 
   if (files.length > 0) {
@@ -148,6 +158,7 @@ const ammendTaskFilesAndNotes = (html, task, subtask) => {
 
   // Add notes
   litObjs.forEach(o => {
+    if (!o.elements) return
     const text = o.elements.find(e => {
       return e.type === 'text'
     })
@@ -211,12 +222,19 @@ const constructHTML = () => {
     if (folderObj) {
       path += folders[folderObj.attributes.idref].path
     }
-    const name = project.elements.find(e => e.name === 'name' && e.elements.length === 1).elements[0].text
+    const nameObj = project.elements.find(e => e.name === 'name' && e.elements.length === 1)
+    if (!nameObj) {
+      return
+    }
+    let name = nameObj.elements[0].text
+    name = name.replace(/\//g, '-')
     html = ammendHeader(html)
     html = ammendProject(html, project, name)
     html = closeTask(html)
     fs.writeFile(`Projects${path}/${name}.html`, html, (err) => {
-      if (err) throw err;
+      if (err) {
+        throw err;
+      }
       console.log('Made:', `Projects${path}/${name}.html`);
     })
   });
